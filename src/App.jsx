@@ -1,13 +1,40 @@
 /// <reference types="chrome"/>
 /* global chrome */
+import { useState } from "react";
 
 function App() {
+  const [status, setStatus] = useState(null);
+
   const sendMessageToBackground = (message) => {
+    setStatus({
+      type: "loading",
+      message: `Processing ${message.command
+        .replace("_", " ")
+        .toLowerCase()}...`,
+    });
+
     chrome.runtime.sendMessage(message, (response) => {
       if (chrome.runtime.lastError) {
         console.error("Error sending message:", chrome.runtime.lastError);
+        setStatus({
+          type: "error",
+          message: chrome.runtime.lastError.message || "Unknown error occurred",
+        });
       } else {
         console.log("Response from background:", response);
+
+        if (response.status === "error") {
+          setStatus({
+            type: "error",
+            message: response.reason || response.message || "Command failed",
+          });
+        } else {
+          setStatus({
+            type: "success",
+            message: response.message || "Command executed successfully",
+          });
+        }
+        setTimeout(() => setStatus(null), 3000);
       }
     });
   };
@@ -75,6 +102,22 @@ function App() {
         >
           Scroll Up
         </button>
+
+        {/* Status display */}
+        {status && (
+          <div
+            className={`mt-3 p-2 w-full rounded text-center text-sm ${
+              status.type === "error"
+                ? "bg-red-700"
+                : status.type === "success"
+                ? "bg-green-700"
+                : "bg-blue-700"
+            }`}
+          >
+            {status.message}
+          </div>
+        )}
+
         <p className="text-xs text-slate-400 pt-2">
           Click buttons to test actions.
         </p>
