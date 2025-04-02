@@ -1,10 +1,13 @@
+/// <reference types="chrome"/>
+/* global chrome */
+
 const tabsWithContentScript = new Set();
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Voice Control Extension - Background Script Initialized!");
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.status === "complete") {
     tabsWithContentScript.delete(tabId);
   }
@@ -83,7 +86,7 @@ async function ensureContentScriptLoaded(tabId) {
       tabsWithContentScript.add(tabId);
       return true;
     } catch (error) {
-      console.log(`Content script not detected in tab ${tabId}, injecting...`);
+      console.log(`Content script not detected in tab ${tabId}, injecting...`, error);
 
       try {
         await chrome.scripting.executeScript({

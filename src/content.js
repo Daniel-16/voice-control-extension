@@ -1,3 +1,5 @@
+/// <reference types="chrome"/>
+/* global chrome */
 console.log("Voice control content script loaded");
 
 function findScrollableElements() {
