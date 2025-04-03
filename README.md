@@ -55,7 +55,7 @@ The voice model will be trained to recognize these commands:
 - "Search Google"
 - "Scroll down"
 - "Scroll up"
-- [Additional commands to be added]
+- Additional commands to be added
 
 ### Training Process
 
