@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { losses } from "@tensorflow/tfjs/dist";
+// import { losses } from "@tensorflow/tfjs/dist";
 // import { pool } from "@tensorflow/tfjs/dist";
 import * as fs from "fs";
 import * as path from "path";
@@ -305,3 +305,9 @@ async function main() {
     console.error("Error in training pipeline:", error);
   }
 }
+
+if (import.meta.url === new URL(import.meta.url).href) {
+    main();
+}
+
+export { createModel, loadTrainingData, trainModel, saveModel };
