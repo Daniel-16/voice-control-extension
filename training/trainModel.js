@@ -242,3 +242,28 @@ async function trainModel(model, dataset) {
 
   return history;
 }
+
+/**
+ * Save the trained model
+ * @param {tf.Sequential} model The trained model
+ * @param {string} outputDir Directory to save the model
+ */
+
+async function saveModel(model, outputDir) {
+    try {
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });            
+        }
+
+        const modelPath = `file://${outputDir}`
+        await model.save(modelPath);
+        console.log(`Model saved to ${modelPath}`);
+        
+        fs.writeFileSync(
+            path.join(outputDir, "commands.json"),
+            JSON.stringify(COMMANDS)
+        )
+    } catch (error) {
+        console.error(`Error saving model: ${error}`);        
+    }
+}
