@@ -3,6 +3,7 @@ import { losses } from "@tensorflow/tfjs/dist";
 // import { pool } from "@tensorflow/tfjs/dist";
 import * as fs from "fs";
 import * as path from "path";
+import process from "process";
 
 const SAMPLE_RATE = 16000;
 const FFT_SIZE = 1024;
@@ -250,22 +251,22 @@ async function trainModel(model, dataset) {
  */
 
 async function saveModel(model, outputDir) {
-    try {
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });            
-        }
-
-        const modelPath = `file://${outputDir}`
-        await model.save(modelPath);
-        console.log(`Model saved to ${modelPath}`);
-        
-        fs.writeFileSync(
-            path.join(outputDir, "commands.json"),
-            JSON.stringify(COMMANDS)
-        )
-    } catch (error) {
-        console.error(`Error saving model: ${error}`);        
+  try {
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
     }
+
+    const modelPath = `file://${outputDir}`;
+    await model.save(modelPath);
+    console.log(`Model saved to ${modelPath}`);
+
+    fs.writeFileSync(
+      path.join(outputDir, "commands.json"),
+      JSON.stringify(COMMANDS)
+    );
+  } catch (error) {
+    console.error(`Error saving model: ${error}`);
+  }
 }
 
 /**
@@ -273,10 +274,34 @@ async function saveModel(model, outputDir) {
  * @param {Array} array The array to shuffle
  */
 function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
 
+async function main() {
+  try {
+    const model = createModel();
+    model.summary();
 
+    const dataDir = process.argv[2] || "./data";
+    const outputDir = process.argv[3] || "./models/voice_commands_model";
+
+    const dataset = await loadTrainingData(dataDir);
+    console.log("Training data loaded");
+
+    await trainModel(model, dataset);
+    await saveModel(model, outputDir);
+
+    // Clean up
+    dataset.trainData.dispose();
+    dataset.trainLabels.dispose();
+    dataset.validationData.dispose();
+    dataset.validationLabels.dispose();
+
+    console.log("Training pipeline completed successfully");
+  } catch (error) {
+    console.error("Error in training pipeline:", error);
+  }
+}
